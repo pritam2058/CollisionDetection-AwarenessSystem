@@ -50,10 +50,18 @@ Bounding boxes are drawn based on the vehicle's **zone and speed**:
    
 - Built-in video player using Tkinter
 
-## Demo
-### Safe Zone
-![Safe](Demo/safe.png)
+## 🎥 Demo
 
-### Alert Zones
-![alert](Demo/alert_case.png)
+### 🟢 Safe Zone
+
+<img src="Demo/safe.png" alt="Safe Zone" width="500"/>
+
+> Vehicles in the green zone with safe speed are shown in green boxes. No alert is triggered.
+
+### 🟡🔴 Alert Zones
+
+<img src="Demo/alert_case.png" alt="Alert Zone" width="500"/>
+
+> Vehicles overlapping yellow or red zones with higher speed trigger caution (yellow) or danger (red) alerts if it exceeds speed limit.
+
 
