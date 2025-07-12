@@ -105,7 +105,10 @@ pip install -r requirements.txt
    - Red zone: Speed danger
 6. GUI shows traffic-light indicator and plays alert sounds accordingly.
 
-
-
+## 🙏 Acknowledgements
+- [Ultralytics YOLOv8](https://github.com/ultralytics/ultralytics) – For state-of-the-art real-time object detection.
+- **DeepSORT** – For robust multi-object tracking based on appearance and motion.
+- **OpenCV** – For computer vision processing and image transformation.
+- **Tkinter** – For building the desktop GUI application.
 
 
