@@ -31,7 +31,7 @@ def draw_reverse_parking_lane(frame):
     ], dtype=np.int32)
 
     # Green Zone
-    green_height = int(new_yellow_height * 0.5 * 1.4)
+    green_height = int(new_yellow_height * 0.5 * 1.38)
     green_bottom_y = new_yellow_top_y
     green_top_y = green_bottom_y - green_height
 
@@ -52,7 +52,7 @@ def draw_reverse_parking_lane(frame):
     ], dtype=np.int32)
 
     # Red Zone (25% decrease in height)
-    red_zone_height = int((h * 0.15) * 0.25 * 0.95 * 0.75)
+    red_zone_height = int((h * 0.20) * 0.25 * 0.95 * 0.75)
     red_top_y = int(h * 1.0) - 1 - red_zone_height
     red_top_left = (int(w * 0.35), red_top_y)
     red_top_right = (int(w * 0.65), red_top_y)

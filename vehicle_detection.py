@@ -68,6 +68,3 @@ def detect_vehicles(frame, lane_zones, filter_inside=True, min_overlap_ratio=0.0
         return frame.copy(), boxes
 
 
-
-
-

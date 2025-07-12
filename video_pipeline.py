@@ -1,4 +1,3 @@
-
 import tkinter as tk
 from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
@@ -7,10 +6,11 @@ import cv2
 import queue
 import time
 import pygame
+import numpy as np
 
 from vehicle_detection import detect_vehicles, vehicle_classes
 from vehicle_tracking import VehicleTracker
-from speed_estimation import SpeedEstimator
+from speed_estimation import SpeedEstimator  # Use your updated SpeedEstimator with homography
 from lane_detection import draw_reverse_parking_lane
 
 class VideoApp:
@@ -67,7 +67,7 @@ class VideoApp:
         self.stop_event = threading.Event()
 
         self.tracker = VehicleTracker()
-        self.speed_estimator = SpeedEstimator(fps=30, my_speed_km_ph=30)
+        self.speed_estimator = SpeedEstimator(fps=30)  # use homography-based speed estimator
 
         pygame.mixer.init()
         self.alert_yellow = pygame.mixer.Sound("alert_audio/yellow_zone.mp3")
@@ -152,7 +152,7 @@ class VideoApp:
         self.btn_pause_resume.config(text="Pause")
 
         self.tracker = VehicleTracker()
-        self.speed_estimator = SpeedEstimator(fps=30, my_speed_km_ph=30)
+        self.speed_estimator = SpeedEstimator(fps=30)
 
         with self.frame_queue.mutex:
             self.frame_queue.queue.clear()
@@ -167,6 +167,13 @@ class VideoApp:
         if self.playing:
             self.paused = not self.paused
             self.btn_pause_resume.config(text="Resume" if self.paused else "Pause")
+
+            if self.paused:
+                # Pause all sounds
+                pygame.mixer.pause()
+            else:
+                # Resume all sounds
+                pygame.mixer.unpause()
 
     def read_frames(self):
         while not self.stop_event.is_set():
@@ -189,6 +196,22 @@ class VideoApp:
             self.cap = None
 
     def process_frames(self):
+        def get_zone_for_box(box, lane_zones, min_overlap_ratio=0.05):
+            x1, y1, x2, y2 = box
+            box_polygon = np.array([[x1, y1], [x2, y1], [x2, y2], [x1, y2]], dtype=np.int32)
+            bbox_area = (x2 - x1) * (y2 - y1)
+
+            for zone_name in ['red_zone', 'yellow_zone', 'green_zone']:
+                zone_polygon = lane_zones[zone_name]
+                intersection_area, _ = cv2.intersectConvexConvex(
+                    box_polygon.astype(np.float32),
+                    zone_polygon.astype(np.float32)
+                )
+                overlap_ratio = intersection_area / bbox_area if bbox_area > 0 else 0
+                if overlap_ratio >= min_overlap_ratio:
+                    return zone_name
+            return None
+
         while not self.stop_event.is_set() or not self.frame_queue.empty():
             if self.paused:
                 time.sleep(0.1)
@@ -202,35 +225,36 @@ class VideoApp:
             frame = cv2.resize(frame, (self.frame_width, self.frame_height))
             lane_zones = draw_reverse_parking_lane(frame)
 
+
             annotated_frame, boxes, class_ids, zone_names = detect_vehicles(frame, lane_zones, return_class_ids=True)
             tracks = self.tracker.update_tracks(boxes, frame)
 
             has_red = False
             has_yellow = False
 
-            for (track_id, x1, y1, x2, y2), cls_id, zone_name in zip(tracks, class_ids, zone_names):
+            for ((track_id, x1, y1, x2, y2), cls_id, zone_name) in zip(tracks, class_ids, zone_names):
                 vehicle_name, base_color = vehicle_classes.get(cls_id, ("vehicle", (0, 255, 0)))
 
-                self.speed_estimator.update(track_id, y1, y2)
+                self.speed_estimator.update(track_id, x1, y1, x2, y2)
                 speed = self.speed_estimator.compute_speed(track_id)
 
                 bbox_color = base_color
 
                 if zone_name == "green_zone":
-                    if speed is None or speed <= 60:
+                    if speed is None or speed <= 10:
                         bbox_color = (0, 255, 0)
                     else:
                         bbox_color = (0, 255, 255)
                         has_yellow = True
                 elif zone_name == "yellow_zone":
-                    if speed is None or speed <= 50:
+                    if speed is None or speed <= 8:
                         bbox_color = (0, 255, 255)
                         has_yellow = True
                     else:
                         bbox_color = (0, 0, 255)
                         has_red = True
                 elif zone_name == "red_zone":
-                    if speed is None or speed <= 20:
+                    if speed is None or speed <= 5:
                         bbox_color = (0, 255, 255)
                         has_yellow = True
                     else:
@@ -239,11 +263,11 @@ class VideoApp:
 
                 cv2.rectangle(annotated_frame, (x1, y1), (x2, y2), bbox_color, 2)
                 cv2.putText(annotated_frame, vehicle_name, (x1, y1 - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, bbox_color, 2)
-                text_size = cv2.getTextSize(str(track_id), cv2.FONT_HERSHEY_SIMPLEX, 0.6, 2)[0]
-                cv2.putText(annotated_frame, f"ID: {track_id}", (x2 - text_size[0], y1 - 25), cv2.FONT_HERSHEY_SIMPLEX, 0.6, bbox_color, 2)
-                display_speed = f"{speed} km/h" if speed is not None else "Calculating"
-                cv2.putText(annotated_frame, f"Speed: {display_speed}", (x1, y2 + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6, bbox_color, 2)
+                display_speed = f"{speed:.3f} km/h" if speed is not None else "Calculating"
+                cv2.putText(annotated_frame, f"Speed: {display_speed}", (x1, y2 + 40), cv2.FONT_HERSHEY_SIMPLEX, 0.6,
+                            bbox_color, 2)
 
+            # Update traffic lights and alerts
             if has_red:
                 self.update_lights('red')
                 traffic_status = 'red'
@@ -289,7 +313,3 @@ def start_app():
     root = tk.Tk()
     app = VideoApp(root)
     root.mainloop()
-
-
-
-
