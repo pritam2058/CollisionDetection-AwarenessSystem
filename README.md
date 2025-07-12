@@ -49,3 +49,11 @@ Bounding boxes are drawn based on the vehicle's **zone and speed**:
   - 🟢 **Green Zone** → No sound
    
 - Built-in video player using Tkinter
+
+## Demo
+### Safe Zone
+![Safe](demo/safe.png)
+
+### Alert Zones
+![alert](demo/alert_case.png)
+
