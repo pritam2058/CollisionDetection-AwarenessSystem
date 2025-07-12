@@ -91,7 +91,7 @@ pip install -r requirements.txt
 - Pillow (PIL)
 - pygame
 - ultralytics
-
+```
 ## 🧠 How It Works
 
 1. Loads video and applies YOLOv8 to detect vehicles.
@@ -103,6 +103,7 @@ pip install -r requirements.txt
    - Yellow zone: Speed caution
    - Red zone: Speed danger
 6. GUI shows traffic-light indicator and plays alert sounds accordingly.
+
 
 
 
