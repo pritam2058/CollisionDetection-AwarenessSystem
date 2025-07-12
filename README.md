@@ -52,8 +52,8 @@ Bounding boxes are drawn based on the vehicle's **zone and speed**:
 
 ## Demo
 ### Safe Zone
-![Safe](demo/safe.png)
+![Safe](Demo/safe.png)
 
 ### Alert Zones
-![alert](demo/alert_case.png)
+![alert](Demo/alert_case.png)
 
