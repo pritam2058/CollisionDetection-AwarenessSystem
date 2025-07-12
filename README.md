@@ -65,8 +65,6 @@ Bounding boxes are drawn based on the vehicle's **zone and speed**:
 > Vehicles overlapping yellow or red zones with higher speed trigger caution (yellow) or danger (red) alerts if it exceeds speed limit.
 
 ## 📦 Installation
-
-1. **Clone the repository**
 ```bash
 # Clone the repository
 git clone https://github.com/pritam2058/CollisionDetection-AwarenessSystem.git
