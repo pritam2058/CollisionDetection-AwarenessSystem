@@ -81,8 +81,9 @@ venv\Scripts\activate
 
 # Install required dependencies
 pip install -r requirements.txt
+```
 
-## Dependencies
+## 📚 Dependencies
 
 - Python 3.8+
 - OpenCV (`cv2`)
@@ -91,7 +92,7 @@ pip install -r requirements.txt
 - Pillow (PIL)
 - pygame
 - ultralytics
-```
+
 ## 🧠 How It Works
 
 1. Loads video and applies YOLOv8 to detect vehicles.
